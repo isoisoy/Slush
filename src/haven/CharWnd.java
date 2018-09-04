@@ -880,9 +880,10 @@ public class CharWnd extends Window {
     }
 
     public static class Wound {
-        public final int id;
+        public final int id, parentid;
         public Indir<Resource> res;
         public Object qdata;
+        public int level;
         private String sortkey = "\uffff";
         private Tex small;
         private final Text.UText<?> rnm = new Text.UText<String>(attrf) {
@@ -1700,10 +1701,10 @@ public class CharWnd extends Window {
         private List<Wound> treesort(List<Wound> from, int pid, int level) {
       	    List<Wound> direct = new ArrayList<>(from.size());
       	    for(Wound w : from) {
-      		if(w.parentid == pid) {
-      		    w.level = level;
-      		    direct.add(w);
-      		}
+          		if(w.parentid == pid) {
+          		    w.level = level;
+          		    direct.add(w);
+          		}
       	    }
       	    Collections.sort(direct, wcomp);
       	    List<Wound> ret = new ArrayList<>(from.size());
@@ -2385,23 +2386,15 @@ public class CharWnd extends Window {
         } else if(nm == "exps") {
             exps.seen.update(decexplist(args, 0));
         } else if (nm == "wounds") {
-            for (int i = 0; i < args.length; i += 3) {
-                int id = (Integer) args[i];
-                Indir<Resource> res = (args[i + 1] == null) ? null : ui.sess.getres((Integer) args[i + 1]);
-                Object qdata = args[i + 2];
-                if (res != null) {
-                    Wound w = wounds.get(id);
-                    if (w == null) {
-                        wounds.add(new Wound(id, res, qdata));
-                    } else {
-                        w.res = res;
-                        w.qdata = qdata;
-                    }
-                    wounds.loading = true;
-                } else {
-                    wounds.remove(id);
-                }
+          if(args.length > 0) {
+            if(args[0] instanceof Object[]) {
+                for(int i = 0; i < args.length; i++)
+              decwound((Object[])args[i], 0, ((Object[])args[i]).length);
+            } else {
+                for(int i = 0; i < args.length; i += 3)
+              decwound(args, i, 3);
             }
+          }
         } else if (nm == "quests") {
             for(int i = 0; i < args.length;) {
                 int id = (Integer)args[i++];

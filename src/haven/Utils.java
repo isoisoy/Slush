@@ -45,6 +45,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.*;
 import java.util.*;
+import java.util.function.*;
 import java.util.function.Consumer;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
@@ -1564,38 +1565,69 @@ public class Utils {
         return (new MapBuilder<K, V>(new HashMap<K, V>()));
     }
 
-    public static <T, F> Iterator<T> filter(Iterator<F> from, Class<T> filter) {
-        return(new Iterator<T>() {
-            boolean h = false;
-            T n;
 
-            public boolean hasNext() {
-                while(!h) {
-                    if(!from.hasNext())
-                        return(false);
-                    F g = from.next();
-                    if(filter.isInstance(g)) {
-                        n = filter.cast(g);
-                        h = true;
-                        break;
-                    }
-                }
-                return(true);
-            }
+    public static <F, T> Iterator<T> map(Iterator<F> from, Function<F, T> fn) {
+	return(new Iterator<T>() {
+		boolean h = false;
+		T n;
 
-            public T next() {
-                if(!hasNext())
-                    throw(new NoSuchElementException());
-                T ret = n;
-                h = false;
-                n = null;
-                return(ret);
-            }
+		public boolean hasNext() {
+		    if(h)
+			return(true);
+		    if(!from.hasNext())
+			return(false);
+		    n = fn.apply(from.next());
+		    h = true;
+		    return(true);
+		}
 
-            public void remove() {
-                from.remove();
-            }
-        });
+		public T next() {
+		    if(!hasNext())
+			throw(new NoSuchElementException());
+		    T ret = n;
+		    h = false;
+		    n = null;
+		    return(ret);
+		}
+
+		public void remove() {
+		    from.remove();
+		}
+	    });
+    }
+
+    public static <E> Iterator<E> filter(Iterator<E> from, Predicate<E> filter) {
+	return(new Iterator<E>() {
+		boolean h = false;
+		E n;
+
+		public boolean hasNext() {
+		    while(!h) {
+			if(!from.hasNext())
+			    return(false);
+			E g = from.next();
+			if(filter.test(g)) {
+			    n = g;
+			    h = true;
+			    break;
+			}
+		    }
+		    return(true);
+		}
+
+		public E next() {
+		    if(!hasNext())
+			throw(new NoSuchElementException());
+		    E ret = n;
+		    h = false;
+		    n = null;
+		    return(ret);
+		}
+
+		public void remove() {
+		    from.remove();
+		}
+	    });
     }
 
     public static <T, F> Iterator<T> filter(Iterator<F> from, Class<T> filter) {

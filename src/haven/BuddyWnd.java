@@ -50,7 +50,7 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
             new Color(255, 255, 255),
             new Color(0, 255, 0),
             new Color(255, 0, 0),
-            new Color(166, 206, 248),
+            new Color(0, 0, 255),
             new Color(0, 255, 255),
             new Color(255, 255, 0),
             new Color(255, 0, 255),
@@ -312,11 +312,14 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
     }
 
     private class BuddyList extends Searchbox<Buddy> {
+
 	public BuddyList(int w, int h) {
 	    super(w, h, 20);
 	}
 
-	public Buddy listitem(int idx) {return(buddies.get(idx));}
+	public Buddy listitem(int idx) {
+    return(buddies.get(idx));
+  }
 	public int listitems() {return(buddies.size());}
 	public boolean searchmatch(int idx, String txt) {return(buddies.get(idx).name.toLowerCase().indexOf(txt.toLowerCase()) >= 0);}
 
@@ -393,17 +396,7 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
         setfocustab(true);
         int y = 0;
         add(new Img(CharWnd.catf.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Kin")).tex()), new Coord(0, 0));
-        search = add(new TextEntry(110, "") {
-            @Override
-            public boolean type(char c, KeyEvent ev) {
-                if (!parent.visible)
-                    return false;
 
-                boolean ret = buf.key(ev);
-                bl.filter = text.toLowerCase();
-                return ret;
-            }
-        }, new Coord(width - 110, y + 5));
         y += 35;
 
         bl = add(new BuddyList(width - Window.wbox.bisz().x, 7), new Coord(Window.wbox.btloff().x, y));
@@ -585,6 +578,8 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
                 b.group = grp;
                 b.seen = seen;
             }
+            if((info != null) && (info.buddy == b))
+              info.update();
             serial++;
         } else if (msg == "sel") {
             int id = (Integer) args[0];
@@ -642,12 +637,12 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
         super.destroy();
     }
 
-    public String getCharName() {
-        return pname != null ? pname.text : null;
-    }
-
-    public void clearSearch() {
-        search.settext("");
-        bl.filter = null;
-    }
+    // public String getCharName() {
+    //     return pname != null ? pname.text : null;
+    // }
+    //
+    // public void clearSearch() {
+    //     search.settext("");
+    //     //bl.filter = null;
+    // }
 }

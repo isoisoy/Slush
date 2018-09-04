@@ -430,8 +430,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 
         @Override
         public boolean show(boolean show) {
-            if (show)
-                gameui().buddies.clearSearch();
+            //if (show)
+                //gameui().buddies.clearSearch();
             return super.show(show);
         }
     }
