@@ -1598,6 +1598,10 @@ public class Utils {
         });
     }
 
+    public static <T, F> Iterator<T> filter(Iterator<F> from, Class<T> filter) {
+	return(map(filter(from, filter::isInstance), filter::cast));
+    }
+
     public static final Comparator<Object> idcmd = new Comparator<Object>() {
         int eid = 0;
         final Map<Ref, Long> emerg = new HashMap<Ref, Long>();

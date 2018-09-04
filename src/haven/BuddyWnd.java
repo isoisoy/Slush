@@ -311,103 +311,81 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
         }
     }
 
-    private class BuddyList extends Listbox<Buddy> {
-        public String filter;
+    private class BuddyList extends Searchbox<Buddy> {
+	public BuddyList(int w, int h) {
+	    super(w, h, 20);
+	}
 
-        public BuddyList(int w, int h) {
-            super(w, h, 20);
-        }
+	public Buddy listitem(int idx) {return(buddies.get(idx));}
+	public int listitems() {return(buddies.size());}
+	public boolean searchmatch(int idx, String txt) {return(buddies.get(idx).name.toLowerCase().indexOf(txt.toLowerCase()) >= 0);}
 
-        public Buddy listitem(int idx) {
-            if (filter == null || filter == "")
-                return buddies.get(idx);
+	protected void drawbg(GOut g) {
+	    g.chcolor(0, 0, 0, 128);
+	    g.frect(Coord.z, sz);
+	    g.chcolor();
+	}
 
-            int num = 0;
-            synchronized (buddies) {
-                for (int i = 0; i < buddies.size(); i++) {
-                    if (buddies.get(i).name.toLowerCase().contains(filter) && num++ == idx)
-                        return buddies.get(i);
-                }
-            }
+	public void drawitem(GOut g, Buddy b, int idx) {
+	    if(soughtitem(idx)) {
+		g.chcolor(255, 255, 0, 32);
+		g.frect(Coord.z, g.sz);
+		g.chcolor();
+	    }
+	    if(b.online == 1)
+		g.image(online, Coord.z);
+	    else if(b.online == 0)
+		g.image(offline, Coord.z);
+	    g.chcolor(gc[b.group]);
+	    g.aimage(b.rname().tex(), new Coord(25, 10), 0, 0.5);
+	    g.chcolor();
+	}
 
-            return buddies.get(idx);
-        }
+	public void draw(GOut g) {
+	    super.draw(g);
+	    if(buddies.size() == 0)
+		g.atext("You are alone in the world", sz.div(2), 0.5, 0.5);
+	}
 
-        public int listitems() {
-            if (filter == null || filter == "")
-                return buddies.size();
+	public void change(Buddy b) {
+	    if(b == null) {
+		BuddyWnd.this.wdgmsg("ch", (Object)null);
+	    } else {
+		BuddyWnd.this.wdgmsg("ch", b.id);
+	    }
+	}
 
-            int num = 0;
-            synchronized (buddies) {
-                for (int i = 0; i < buddies.size(); i++) {
-                    if (buddies.get(i).name.toLowerCase().contains(filter))
-                        num++;
-                }
-            }
-            return num;
-        }
+	public void opts(final Buddy b, Coord c) {
+	    if(menu == null) {
+		Map<String, Runnable> bopts = b.opts();
+		menu = new FlowerMenu(bopts.keySet().toArray(new String[0])) {
+			public void destroy() {
+			    menu = null;
+			    super.destroy();
+			}
 
-        protected void drawbg(GOut g) {
-            g.chcolor(0, 0, 0, 128);
-            g.frect(Coord.z, sz);
-            g.chcolor();
-        }
+			public void choose(Petal opt) {
+			    if(opt != null) {
+				Runnable act = bopts.get(opt.name);
+				if(act != null)
+				    act.run();
+				uimsg("act", opt.num);
+			    } else {
+				uimsg("cancel");
+			    }
+			}
+		    };
+		ui.root.add(menu, c);
+	    }
+	}
 
-        public void drawitem(GOut g, Buddy b, int idx) {
-            if (b.online == 1)
-                g.image(online, Coord.z);
-            else if (b.online == 0)
-                g.image(offline, Coord.z);
-            g.chcolor(gc[b.group]);
-            g.aimage(b.rname().tex(), new Coord(25, 10), 0, 0.5);
-            g.chcolor();
-        }
-
-        public void draw(GOut g) {
-            super.draw(g);
-            if (buddies.size() == 0)
-                g.atext("You are alone in the world", sz.div(2), 0.5, 0.5);
-        }
-
-        public void change(Buddy b) {
-            if(b == null) {
-                BuddyWnd.this.wdgmsg("ch", (Object)null);
-            } else {
-                BuddyWnd.this.wdgmsg("ch", b.id);
-            }
-        }
-
-        public void opts(final Buddy b, Coord c) {
-            if(menu == null) {
-                Map<String, Runnable> bopts = b.opts();
-                menu = new FlowerMenu(bopts.keySet().toArray(new String[0])) {
-                    public void destroy() {
-                        menu = null;
-                        super.destroy();
-                    }
-
-                    public void choose(Petal opt) {
-                        if(opt != null) {
-                            Runnable act = bopts.get(opt.name);
-                            if(act != null)
-                                act.run();
-                            uimsg("act", opt.num);
-                        } else {
-                            uimsg("cancel");
-                        }
-                    }
-                };
-                ui.root.add(menu, c);
-            }
-        }
-
-        public void itemclick(Buddy b, int button) {
-            if (button == 1) {
-                change(b);
-            } else if (button == 3) {
-                opts(b, ui.mc);
-            }
-        }
+	public void itemclick(Buddy b, int button) {
+	    if(button == 1) {
+		change(b);
+	    } else if(button == 3) {
+		opts(b, ui.mc);
+	    }
+	}
     }
 
     public BuddyWnd() {
