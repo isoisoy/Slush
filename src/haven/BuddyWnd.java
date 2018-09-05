@@ -637,9 +637,9 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
         super.destroy();
     }
 
-    // public String getCharName() {
-    //     return pname != null ? pname.text : null;
-    // }
+    public String getCharName() {
+        return pname != null ? pname.text : null;
+    }
     //
     // public void clearSearch() {
     //     search.settext("");
